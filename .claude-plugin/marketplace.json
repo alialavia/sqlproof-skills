@@ -1,0 +1,27 @@
+{
+  "name": "sqlproof-skills",
+  "owner": {
+    "name": "Ali Alavi",
+    "url": "https://github.com/alialavia"
+  },
+  "metadata": {
+    "description": "Claude Code skills for property-based testing PostgreSQL schemas and SQL behavior with sqlproof — RLS policies, RPC functions, stateful tests, CI/CD setup.",
+    "version": "0.1.0",
+    "repository": "https://github.com/alialavia/sqlproof-skills"
+  },
+  "plugins": [
+    {
+      "name": "sqlproof",
+      "description": "Write property-based tests for PostgreSQL using sqlproof. Includes a core skill (when to use sqlproof, fixtures, bootstrap a new project) plus focused per-pattern skills (RLS policies, RPC functions, stateful tests, CI/CD setup). Pairs with alialavia/pbt-skills for the foundational property-testing patterns.",
+      "source": "./",
+      "strict": false,
+      "skills": [
+        "./skills/sqlproof",
+        "./skills/sqlproof-rls-testing",
+        "./skills/sqlproof-rpc-testing",
+        "./skills/sqlproof-stateful-testing",
+        "./skills/sqlproof-ci-setup"
+      ]
+    }
+  ]
+}
