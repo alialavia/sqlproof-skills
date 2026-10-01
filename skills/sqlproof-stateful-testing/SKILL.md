@@ -32,7 +32,7 @@ from hypothesis import strategies as st
 from hypothesis.stateful import invariant, rule
 
 from sqlproof import SqlProof
-from sqlproof.contrib.supabase import as_supabase_user
+from sqlproof.contrib.supabase import as_rls_user
 from sqlproof.testing import SqlProofStateMachine
 
 
@@ -45,10 +45,6 @@ class MembershipMachine(SqlProofStateMachine):
         )
         self.user_id = rows[0]["id"]
         self.projects: list[str] = [str(uuid4()) for _ in range(3)]
-        # `self.enter(cm)` adopts a context manager for the lifetime of
-        # this example. Used here for the RLS context — every rule's
-        # query runs as `self.user_id`.
-        self.enter(as_supabase_user(self.db, self.user_id))
         self.member_of: set[str] = set()
 
     @rule(idx=st.integers(0, 2))
@@ -72,7 +68,12 @@ class MembershipMachine(SqlProofStateMachine):
 
     @invariant()
     def user_only_sees_projects_they_are_member_of(self) -> None:
-        visible = {row["id"] for row in self.db.query("SELECT id FROM projects")}
+        # Rules mutate as the test superuser; only the visibility check
+        # runs as the user. `as_rls_user` also does `SET LOCAL ROLE
+        # authenticated` — without it the superuser's BYPASSRLS means
+        # the policy is never evaluated.
+        with as_rls_user(self.db, self.user_id):
+            visible = {row["id"] for row in self.db.query("SELECT id FROM projects")}
         assert visible == self.member_of, (
             f"visible {visible} != expected {self.member_of}"
         )
@@ -110,9 +111,17 @@ claims, savepoints, mocked clocks), call `self.enter(cm)` in
 ends.
 
 ```python
-self.enter(as_supabase_user(self.db, self.user_id))
-# Now every rule's query runs as that user
+self.enter(as_rls_user(self.db, self.user_id))
+# Now every rule's query runs as that user, with RLS enforced
 ```
+
+Only do this when the rules themselves should go through the
+policies (e.g. testing that a user can INSERT/DELETE their own
+membership). If rules set up state the user couldn't create
+directly, keep them on the superuser connection and wrap just the
+invariant's query in `as_rls_user`, as in the pattern above. Use
+`as_supabase_user` (claims only, no role switch) only when you need
+`auth.uid()` resolved without enforcing policies.
 
 ### Run via `proof.run_state_machine(MachineClass)`
 

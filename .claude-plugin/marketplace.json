@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "Claude Code skills for property-based testing PostgreSQL schemas and SQL behavior with sqlproof — RLS policies, RPC functions, stateful tests, CI/CD setup.",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "repository": "https://github.com/alialavia/sqlproof-skills"
   },
   "plugins": [
