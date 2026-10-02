@@ -59,6 +59,13 @@ def test_other_users_cannot_read_<resource>_they_dont_own(
         assert rows == [], "non-owner should see no rows"
 ```
 
+Naming `"auth.users": 2` in `sizes` makes the dataset use exactly two
+pool users for every `auth.users` FK and return them as
+`dataset["auth.users"]` (each row holds only `id`). Without that entry
+there is no `dataset["auth.users"]` key. Requires sqlproof 0.11.2 or
+later; on 0.11.1 the key is missing even when named, so read the pool
+with `db.query("SELECT id::text AS id FROM auth.users")` instead.
+
 ## Critical rules
 
 ### Always test BOTH directions
@@ -138,7 +145,7 @@ def test_outsider_cannot_read_<resource>_in_another_org(
     supabase_proof: SqlProof, data,
 ) -> None:
     dataset = data.draw(supabase_proof.dataset_strategy(
-        sizes={"organizations": 1, "org_members": 1, "<resource>": 1},
+        sizes={"organizations": 1, "org_members": 1, "<resource>": 1, "auth.users": 2},
     ))
     with supabase_proof.client_for_dataset(dataset) as db:
         member = dataset["org_members"][0]
