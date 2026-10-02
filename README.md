@@ -14,7 +14,8 @@ Five auto-activating skills:
   to bootstrap a new project.
 - **`sqlproof-rls-testing`** — pattern for testing an RLS policy.
   Both-directions principle (owner can see + non-owner cannot),
-  `as_supabase_user` context manager, no manual JWT-claim setting.
+  `as_rls_user` context manager (claims + `SET LOCAL ROLE` so RLS is
+  actually enforced), no manual JWT-claim setting.
 - **`sqlproof-rpc-testing`** — pattern for testing a SQL function /
   RPC. Property tests with invariants ("never negative", "monotonic",
   oracle-comparison against a Python recomputation).

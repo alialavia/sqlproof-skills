@@ -145,11 +145,16 @@ db.execute(
     json.dumps({"sub": user_id, "role": "authenticated"}),
 )
 
-# Right — readable, restored on exit, exception-safe:
-from sqlproof.contrib.supabase import as_supabase_user
-with as_supabase_user(db, user_id):
+# Right — readable, restored on exit, exception-safe, RLS enforced:
+from sqlproof.contrib.supabase import as_rls_user
+with as_rls_user(db, user_id):
     ...
 ```
+
+`as_rls_user` also runs `SET LOCAL ROLE authenticated`; the superuser
+test connection has BYPASSRLS, so without the role switch policies are
+never evaluated. `as_supabase_user` sets the claims only — use it just
+for resolving `auth.uid()` without enforcing policies.
 
 ### ❌ Don't pass parameters to `db.execute` as a list
 
