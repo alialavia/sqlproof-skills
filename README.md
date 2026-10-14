@@ -5,7 +5,7 @@ Claude Code skills for testing PostgreSQL schemas and SQL behavior with
 
 ## What's included
 
-Five auto-activating skills:
+Six auto-activating skills:
 
 - **`sqlproof`** — core skill. Activates whenever the user asks about
   testing PostgreSQL, RLS policies, RPC functions, or property-based
@@ -28,6 +28,11 @@ Five auto-activating skills:
   `alialavia/sqlproof/.github/actions/setup-supabase-test-db@v0.x.y`,
   with the auth migration and `storage.buckets` columns Supabase
   consumers need.
+- **`sqlproof-scenarios`** — seeded, reproducible database states
+  (experimental in sqlproof). Pin the rows a case depends on in Python
+  or YAML, generate the rest from a seed, check without a database and
+  load with `sqlproof scenarios up` or the MCP `load_scenario` tool.
+  Replaces hand-written seed SQL; never truncates without asking.
 
 All skills auto-activate based on task description. The agent
 loads only the relevant skill for the task at hand, not all 700+
