@@ -120,6 +120,32 @@ schema_sql)` for step 2 and `load_scenario(scenario, dsn)` for step 3,
 passing the scenario as JSON in the YAML shape above. `list_recipes`
 has a `scenario` template.
 
+### From a failing property
+
+A failing property writes `.sqlproof/failures/<test>.json`. To give a
+person the rows that broke it, as a database they can open:
+
+```bash
+sqlproof replay .sqlproof/failures/test_totals.json --as-scenario \
+  --schema-file supabase/schemas/schema.sql \
+  --output scenarios/totals_failure.scenario.yaml
+sqlproof scenarios up counterexample_test_totals --dsn "$SCRATCH_DATABASE_URL"
+```
+
+Every row is pinned and foreign keys become references, so the
+relationships survive, but primary keys are reassigned. If the failure
+depends on the key values themselves, use the counterexample file. The
+file also records the seed: pass it back as `seed=` to repeat the search.
+
+### In property tests and scale sweeps
+
+- `@given(dataset=tiered_customers.strategy(proof))` with
+  `proof.client_for_dataset(dataset)`: pinned rows are in every draw and
+  only the unpinned rows vary and shrink. Keep these scenarios small.
+- `scale_analysis(proof, "fn", scenario=tiered_customers,
+  args=[RowRef("acme")])`: fills grow with the factor; cohorts and named
+  rows stay fixed, so "acme as everything else grows" is one sweep.
+
 ## Rules
 
 - **Never pass `--truncate-existing` (`truncate_existing=True`) without
@@ -145,7 +171,9 @@ has a `scenario` template.
   works in Python but cannot be exported to YAML; prefer literals and
   references. `sqlproof scenarios export NAME` turns a Python scenario
   into YAML.
-- **Pin `json` and array columns as strings** in YAML.
+- **Pin `json` columns as objects or lists, and array columns as lists**
+  (`set: {meta: {plan: pro}, tags: [a, b]}`). An object that is exactly
+  `{ref: <name>}` is always a reference.
 
 ## Current limits
 
