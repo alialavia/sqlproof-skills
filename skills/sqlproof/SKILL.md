@@ -1,6 +1,6 @@
 ---
 name: sqlproof
-description: Write property-based tests for PostgreSQL schemas and SQL behavior using sqlproof. Use whenever the user asks to test a Supabase project, RLS policies, RPC functions, SQL functions, database triggers, migrations, or any code that touches PostgreSQL. Also use whenever the task mentions sqlproof, dataset generation respecting FK/CHECK/UNIQUE constraints, the `@sqlproof` decorator, `proof.check`, `proof.client_for_dataset`, the seeded auth.users pool, `supabase_proof`/`supabase_db` fixtures, or testing with savepoint isolation. This skill explains when to use sqlproof, the four canonical fixtures the pytest plugin ships, how to bootstrap a new project, and what NOT to do. For pattern-specific guidance, also load the relevant sibling skill (`sqlproof-rls-testing`, `sqlproof-rpc-testing`, `sqlproof-stateful-testing`, `sqlproof-ci-setup`). Without this skill, generated tests tend to reinvent fixtures the plugin already ships, hand-roll INSERT helpers that defeat property-based testing, or leak postgres internals (manual JWT claims) into test code.
+description: Write property-based tests for PostgreSQL schemas and SQL behavior using sqlproof. Use whenever the user asks to test a Supabase project, RLS policies, RPC functions, SQL functions, database triggers, migrations, or any code that touches PostgreSQL. Also use whenever the task mentions sqlproof, dataset generation respecting FK/CHECK/UNIQUE constraints, the `@sqlproof` decorator, `proof.check`, `proof.client_for_dataset`, the seeded auth.users pool, `supabase_proof`/`supabase_db` fixtures, or testing with savepoint isolation. This skill explains when to use sqlproof, the four canonical fixtures the pytest plugin ships, how to bootstrap a new project, and what NOT to do. For pattern-specific guidance, also load the relevant sibling skill (`sqlproof-rls-testing`, `sqlproof-rpc-testing`, `sqlproof-stateful-testing`, `sqlproof-ci-setup`, `sqlproof-scenarios`). Without this skill, generated tests tend to reinvent fixtures the plugin already ships, hand-roll INSERT helpers that defeat property-based testing, or leak postgres internals (manual JWT claims) into test code.
 ---
 
 # sqlproof — core
@@ -16,6 +16,8 @@ For pattern-specific guidance, ALSO load the relevant sibling skill:
 - **`sqlproof-rpc-testing`** — SQL function / RPC tests
 - **`sqlproof-stateful-testing`** — sequence-dependent bugs
 - **`sqlproof-ci-setup`** — wiring into GitHub Actions
+- **`sqlproof-scenarios`** — a seeded, reproducible database state
+  (seed data, e2e test setup, bug repros) instead of seed SQL
 
 This skill also assumes the foundational property-based-testing
 patterns are available via the companion `alialavia/pbt-skills`
@@ -36,6 +38,9 @@ Do **not** use sqlproof for:
 - Schema-shape assertions ("does this column exist") — one-line
   `information_schema` query in pgTAP or skip entirely
 - Snapshot tests of literal output — use `syrupy` or pytest's snapshot
+
+For a database that should *hold specific rows* (seed data, an e2e test's
+starting state, a bug repro), use a scenario: load `sqlproof-scenarios`.
 
 ## Project setup
 
