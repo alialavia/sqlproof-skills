@@ -142,6 +142,9 @@ file also records the seed: pass it back as `seed=` to repeat the search.
 - `@given(dataset=tiered_customers.strategy(proof))` with
   `proof.client_for_dataset(dataset)`: pinned rows are in every draw and
   only the unpinned rows vary and shrink. Keep these scenarios small.
+  `strategy()` refuses a scenario that seeds `auth.users` (a Hypothesis
+  dataset cannot carry rows for a table outside the schema); load those
+  with `scenarios up` or `.load(dsn)` instead.
 - `scale_analysis(proof, "fn", scenario=tiered_customers,
   args=[RowRef("acme")])`: fills grow with the factor; cohorts and named
   rows stay fixed, so "acme as everything else grows" is one sweep.
