@@ -134,8 +134,10 @@ sqlproof scenarios up counterexample_test_totals --dsn "$SCRATCH_DATABASE_URL"
 
 Every row is pinned and foreign keys become references, so the
 relationships survive, but primary keys are reassigned. If the failure
-depends on the key values themselves, use the counterexample file. The
-file also records the seed: pass it back as `seed=` to repeat the search.
+depends on the key values themselves, use the counterexample file. A key
+that is also a foreign key (`profiles.id -> auth.users`) is pinned as a
+reference and keeps its parent. The file also records the seed
+Hypothesis drew: pass it back as `seed=` to repeat the search.
 
 ### In property tests and scale sweeps
 
