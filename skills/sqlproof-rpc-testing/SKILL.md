@@ -22,7 +22,7 @@ asserts an invariant.
 
 from decimal import Decimal
 
-from hypothesis import HealthCheck, given, settings
+from hypothesis import HealthCheck, example, given, settings
 from hypothesis import strategies as st
 
 from sqlproof.client import SqlProofClient
@@ -40,6 +40,11 @@ PROOF_KW = settings(
     subtotal=st.decimals(min_value=Decimal("0"), max_value=Decimal("9999.99"), places=2),
     tier=st.sampled_from(["standard", "silver", "gold", "platinum"]),
 )
+# Trigger region: the ends of the documented domain, where discounts
+# and rounding go wrong. ~100 examples won't hit them by chance.
+@example(subtotal=Decimal("0"), tier="platinum")
+@example(subtotal=Decimal("0.01"), tier="platinum")
+@example(subtotal=Decimal("9999.99"), tier="standard")
 def test_invoice_total_is_never_negative(
     db: SqlProofClient, subtotal: Decimal, tier: str,
 ) -> None:
@@ -66,6 +71,13 @@ def test_higher_tier_never_costs_more_than_lower_tier(
 
 Use `db` (not `supabase_db`) if the function doesn't depend on
 auth state.
+
+Derive the strategy bounds from the function's documented domain, not
+from a "reasonable" range: if `compute_order_total` accepts negative
+subtotals (refunds) or zero, the strategy must generate them. Before
+adding `assume()`, check it doesn't discard the inputs most likely to
+break the function. For dataset-backed tests, check the core skill's
+"What the generators don't produce" table.
 
 ### Shape 2: Aggregation against generated dataset
 
